@@ -18,6 +18,7 @@ class LazyLoader
             result: false
             state: W8
             weight: weight
+            progress: 0
         }
 
         @links.push(linkObj)
@@ -30,10 +31,20 @@ class LazyLoader
     load: (id) ->
 
         link = @links[id]
-        link.link.load().then((result) =>
-            link.state = LOAD_END
-            @hub.emit('link:loadEnd', link)
-            @hub.emit('progress', @getProgress())
+        link.link.load().then(
+            (result) =>
+                link.state = LOAD_END
+                link.result = result
+                link.progress = 1
+                @hub.emit('link:loadEnd', link)
+                @hub.emit('progress', @getProgress())
+
+            (fail) => console.warn(fail)
+            (progress) =>
+                @hub.emit('link:progress', link)
+                @hub.emit('progress', @getProgress())
+                link.progress = progress
+
         ).done()
         link.state = LOAD_START
         @hub.emit('link:loadStart', link)
@@ -50,17 +61,16 @@ class LazyLoader
 
 
     totalWeight: (ids) ->
-        return ids.reduce((result, id)=>
-            return result + @links[id].weight)
+        result = 0
+        (result += @links[id].weight) for id in ids
+        result
 
     getProgress: (ids) ->
 
         if ids
             loaded = ids.reduce((result, id) =>
                 link = @links[id]
-                if(link.state == LOAD_END)
-                    return result + link.weight
-                return result
+                return result + link.progress * link.weight
             , 0)
 
             return loaded/@totalWeight(ids)

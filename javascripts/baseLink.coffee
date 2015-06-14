@@ -14,6 +14,12 @@ class BaseLink
         @loadStart = true
         xhr = new XMLHttpRequest()
         xhr.overrideMimeType(@mime)
+
+        xhr.onprogress = (event) =>
+            if(event.lengthComputable)
+                @current = event.loaded
+                @defer.notify(event.loaded/event.total)
+
         xhr.onreadystatechange = (state) =>
             switch xhr.readyState
                 when 2
@@ -22,8 +28,10 @@ class BaseLink
 
                 when 3
                     length = xhr.getResponseHeader("Content-length");
-                    @current = xhr.responseType.length;
-                    @defer.notify(@current);
+                    @current = xhr.response.length;
+
+                    if(@current)
+                        @defer.notify(@current/@total);
 
                 when 4
                     if (xhr.status == 200)
