@@ -52,10 +52,10 @@ class LazyLoader
 
     loadBundle: (ids) ->
 
-        promises = @links[id].link.promise for id in ids
+        promises = ids.map((id) => @links[id].link.defer)
         q.all(promises).then(() =>
             @hub.emit('bundle:loadEnd', ids)
-        )
+        ).catch((err) -> console.error(err))
         @load(id) for id in ids
         @hub.emit('bunlde:loadStart', ids)
 

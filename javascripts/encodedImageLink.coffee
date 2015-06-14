@@ -1,5 +1,9 @@
 BaseLink = require('./baseLink');
 
+
+getPictureType = (url) ->
+    return url.slice(-3);
+
 base64Encode =  (str) ->
     CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
     out = ""
@@ -31,20 +35,20 @@ base64Encode =  (str) ->
 
 
 
-class Base64ImageLink extends BaseLink
+class EncodedImageLink extends BaseLink
 
     constructor: (url) ->
         super(url, 'text/plain; charset=x-user-defined')
+        @picType = getPictureType(url)
 
     load: ->
-        return super().then((xhr) ->
+        return super().then((xhr) =>
 
             data = xhr.responseText;
 
             encoded = base64Encode(data)
-            src = "data:image/png;base64," + encoded
+            src = "data:image/#{@picType};base64," + encoded
             return src
         )
 
-
-module.exports = Base64ImageLink
+module.exports = EncodedImageLink
