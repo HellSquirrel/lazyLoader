@@ -31,6 +31,15 @@ class LazyLoader
     load: (id) ->
 
         link = @links[id]
+
+        #already loaded
+        if(link.state = LOAD_END)
+            @hub.emit('link:loadEnd', link)
+            @hub.emit('progress', @getProgress())
+
+        link.state = LOAD_START
+        @hub.emit('link:loadStart', link)
+
         link.link.load().then(
             (result) =>
                 link.state = LOAD_END
@@ -46,14 +55,13 @@ class LazyLoader
                 link.progress = progress
 
         ).done()
-        link.state = LOAD_START
-        @hub.emit('link:loadStart', link)
 
 
     loadBundle: (ids) ->
 
         promises = ids.map((id) => @links[id].link.defer)
         q.all(promises).then(() =>
+            console.debug('bundle load complete!')
             @hub.emit('bundle:loadEnd', ids)
         ).catch((err) -> console.error(err))
         @load(id) for id in ids

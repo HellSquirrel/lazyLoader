@@ -1,12 +1,12 @@
-Link = require('./scriptLink')
-encodedImageLink = require('./encodedImageLink')
-CssLink = require('./cssLink')
-SimpleImageLink = require('./simpleImageLink')
+Link = require('./links/scriptLink')
+encodedImageLink = require('./links/encodedImageLink')
+CssLink = require('./links/cssLink')
+SimpleImageLink = require('./links/simpleImageLink')
 
-LazyLoader = require('./lazyLoader')
-AssetsLoader = require('./assetsLoader')
+LazyLoader = require('./loader/lazyLoader')
+AssetsLoader = require('./loader/assetsLoader')
 
-Renderer = require('./renderer')
+Renderer = require('./renderer/renderer')
 $ = require('jquery')
 
 
@@ -54,12 +54,18 @@ $(->
 
     al = new AssetsLoader(urls)
     ahub = al.getHub()
-    ahub.on('link:loadStart', (link) -> console.log('single link load start', link))
-    ahub.on('link:loadEnd', (link) -> console.log('single link load end', link))
+#    ahub.on('link:loadStart', (link) -> console.log('single link load start', link))
+#    ahub.on('link:loadEnd', (link) -> console.log('single link load end', link))
     ahub.on('progress', (progress) ->
         console.log('total progress is', progress,'task progress is', al.getProgress([0,1,2])))
     ahub.on('bunlde:loadStart', (ids) -> console.log('start loading for ids', ids))
-    ahub.on('bundle:loadEnd', (ids) -> console.log('loading for ids complete', ids))
-    al.loadBundle([0,1,2])
+    ahub.on('bundle:loadEnd', (ids) =>
+        console.log('loading for ids complete', ids)
+        console.log(@links)
+    )
+#    al.loadBundle([0,1,2])
+#    al.loadBundle([1])
+    ahub.emit('command.loadBundle', [0,1,2])
 
+    $.get('/test/test.js');
 )

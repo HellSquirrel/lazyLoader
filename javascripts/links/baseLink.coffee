@@ -3,7 +3,7 @@ q = require('q');
 class BaseLink
     constructor: (@url, type) ->
         @defer = q.defer()
-        @curent = 0
+        @current = 0
         @mime = type
         @loadStart = false
         @loadEnd = false

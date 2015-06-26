@@ -1,11 +1,11 @@
-LazyLoader = require('./lazyLoader')
-ScriptLink = require('./scriptLink')
-CssLink = require('./cssLink')
-LazyLoader = require('./lazyLoader')
-SimpleImageLink = require('./simpleImageLink')
+LazyLoader = require('./../loader/lazyLoader')
+ScriptLink = require('./../links/scriptLink')
+CssLink = require('./../links/cssLink')
+LazyLoader = require('./../loader/lazyLoader')
+SimpleImageLink = require('./../links/simpleImageLink')
 
-BaseLink = require('./baseLink');
-EncodedImageLink = require('./encodedImageLink')
+BaseLink = require('./../links/baseLink');
+EncodedImageLink = require('./../links/encodedImageLink')
 
 
 isScript = (url) ->
