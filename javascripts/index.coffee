@@ -6,6 +6,8 @@ SimpleImageLink = require('./links/simpleImageLink')
 LazyLoader = require('./loader/lazyLoader')
 AssetsLoader = require('./loader/assetsLoader')
 
+Strategy = require('./stategy/justLoad')
+
 Renderer = require('./renderer/renderer')
 $ = require('jquery')
 
@@ -52,7 +54,7 @@ $(->
 
 ######################################################### assetLoader tests
 
-    al = new AssetsLoader(urls)
+    al = new AssetsLoader(urls, Strategy)
     ahub = al.getHub()
 #    ahub.on('link:loadStart', (link) -> console.log('single link load start', link))
 #    ahub.on('link:loadEnd', (link) -> console.log('single link load end', link))
@@ -62,6 +64,7 @@ $(->
     ahub.on('bundle:loadEnd', (ids) =>
         console.log('loading for ids complete', ids)
         console.log(@links)
+        al.dumpAllLoaded();
     )
 #    al.loadBundle([0,1,2])
 #    al.loadBundle([1])

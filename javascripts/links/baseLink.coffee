@@ -7,12 +7,13 @@ class BaseLink
         @mime = type
         @loadStart = false
         @loadEnd = false
+        @xhr = null
 
 
     load:  ->
 
         @loadStart = true
-        xhr = new XMLHttpRequest()
+        @xhr = xhr = new XMLHttpRequest()
         xhr.overrideMimeType(@mime)
 
         xhr.onprogress = (event) =>

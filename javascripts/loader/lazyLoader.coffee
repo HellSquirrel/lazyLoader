@@ -5,24 +5,47 @@ LOAD_START = 1
 LOAD_END = 2
 
 class LazyLoader
-    constructor: (links)->
+    constructor: (links, strategy)->
         @hub = new Hub
         @links = []
         if(links)
             @addLink(link) for link in links
 
+        @strategy = strategy
+
+
     addLink: (link , weight = 1) ->
 
         linkObj = {
+            id: @links.length
             link: link
             result: false
             state: W8
             weight: weight
-            progress: 0
+            progress: 0,
+            inStorage: false
         }
 
         @links.push(linkObj)
         @hub.emit('link:add', linkObj)
+
+
+    dump: (id) ->
+
+        link = @links[id]
+        if(id >= @links.length)
+            throw 'no link with id = ' + id
+
+        if(link.state != LOAD_END)
+            throw 'you are trying to save link with state' + link.state
+
+        @strategy.save(link)
+
+
+    dumpAllLoaded: () ->
+        for link in @links
+            if link.state == LOAD_END
+                @dump(link.id)
 
     removeLink: (id) ->
         link = @links.splice(id, 1)
@@ -34,27 +57,34 @@ class LazyLoader
 
         #already loaded
         if(link.state = LOAD_END)
+            con.debug('link already loaded, servign from chashe')
             @hub.emit('link:loadEnd', link)
             @hub.emit('progress', @getProgress())
 
-        link.state = LOAD_START
-        @hub.emit('link:loadStart', link)
+        #load in progress
+        else if (link.state = LOAD_START)
+            con.debug('load already started')
+            #do nothing
 
-        link.link.load().then(
-            (result) =>
-                link.state = LOAD_END
-                link.result = result
-                link.progress = 1
-                @hub.emit('link:loadEnd', link)
-                @hub.emit('progress', @getProgress())
+        else
+            link.state = LOAD_START
+            @hub.emit('link:loadStart', link)
 
-            (fail) => console.warn(fail)
-            (progress) =>
-                @hub.emit('link:progress', link)
-                @hub.emit('progress', @getProgress())
-                link.progress = progress
+            link.link.load().then(
+                (result) =>
+                    link.state = LOAD_END
+                    link.result = result
+                    link.progress = 1
+                    @hub.emit('link:loadEnd', link)
+                    @hub.emit('progress', @getProgress())
 
-        ).done()
+                (fail) => console.warn(fail)
+                (progress) =>
+                    @hub.emit('link:progress', link)
+                    @hub.emit('progress', @getProgress())
+                    link.progress = progress
+
+            ).done()
 
 
     loadBundle: (ids) ->
